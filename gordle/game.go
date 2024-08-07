@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
+	"strings"
 )
 
 type Game struct {
-	reader *bufio.Reader
+	reader      *bufio.Reader
+	solution    []rune
+	maxAttempts int
 }
 
 const solutionLength = 5
@@ -23,18 +27,32 @@ func (g *Game) validateGuess(guess []rune) error {
 	return nil
 }
 
-func New(playerInput io.Reader) *Game {
+func splitToUpperCase(input string) []rune {
+	return []rune(strings.ToUpper(input))
+}
+
+func New(playerInput io.Reader, solution string, maxAttempts int) *Game {
 	g := &Game{
-		reader: bufio.NewReader(playerInput),
+		reader:      bufio.NewReader(playerInput),
+		solution:    splitToUpperCase(solution),
+		maxAttempts: maxAttempts,
 	}
 
 	return g
 }
 func (g *Game) Play() {
 	fmt.Println("Welcome to gordle")
-	gues := g.ask()
 
-	fmt.Printf("Your guess is %s\n", string(gues))
+	for currentAttempt := 1; currentAttempt <= g.maxAttempts; currentAttempt++ {
+		guess := g.ask()
+
+		if slices.Equal(guess, g.solution) {
+			fmt.Printf("🔥 You won! You found it in %d guess(es)! The word was: %s.\n", currentAttempt, string(g.solution))
+			return
+		}
+	}
+
+	fmt.Printf("You Lost! The solution was: %s", string(g.solution))
 }
 
 func (g *Game) ask() []rune {
