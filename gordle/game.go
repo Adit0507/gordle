@@ -21,7 +21,7 @@ var errInvalidWordLength = fmt.Errorf("invalid guess, word doesnt exist 🙄")
 
 func (g *Game) validateGuess(guess []rune) error {
 	if len(guess) != solutionLength {
-		return fmt.Errorf("expected %d, got %d, %w", solutionLength, len(guess), errInvalidWordLength)
+		return fmt.Errorf("expected %d, got %d, %w", len(g.solution), len(guess), errInvalidWordLength)
 	}
 
 	return nil
@@ -56,7 +56,7 @@ func (g *Game) Play() {
 }
 
 func (g *Game) ask() []rune {
-	fmt.Printf("Enter a %d character guess: \n", solutionLength)
+	fmt.Printf("Enter a %d character guess: \n", len(g.solution))
 
 	for {
 		playerInput, _, err := g.reader.ReadLine()
