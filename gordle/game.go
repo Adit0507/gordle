@@ -13,6 +13,16 @@ type Game struct {
 
 const solutionLength = 5
 
+var errInvalidWordLength = fmt.Errorf("invalid guess, word doesnt exist 🙄")
+
+func (g *Game) validateGuess(guess []rune) error {
+	if len(guess) != solutionLength {
+		return fmt.Errorf("expected %d, got %d, %w", solutionLength, len(guess), errInvalidWordLength)
+	}
+
+	return nil
+}
+
 func New(playerInput io.Reader) *Game {
 	g := &Game{
 		reader: bufio.NewReader(playerInput),
@@ -40,8 +50,9 @@ func (g *Game) ask() []rune {
 		guess := []rune(string(playerInput))
 
 		// verification
-		if len(guess) != solutionLength {
-			_, _ = fmt.Fprintf(os.Stderr, "Your attempt is invalid with Gordle's solution! Expected %d characters, got %d.\n", solutionLength, len(guess))
+		err = g.validateGuess(guess)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Your attempt is invalid with Gordle's solution: %s\n", err.Error())
 		} else {
 			return guess
 		}
