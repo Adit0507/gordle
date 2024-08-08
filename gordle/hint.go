@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-type hint byte
+type hint int
 
 type feedback []hint
 
