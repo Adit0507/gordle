@@ -27,6 +27,50 @@ func (g *Game) validateGuess(guess []rune) error {
 	return nil
 }
 
+// verifies every character of the guess against the solution
+func computeFeedback(guess, solution []rune) feedback {
+	res := make(feedback, len(guess))
+	used := make([]bool, len(solution))
+
+	if len(guess) != len(solution) {
+		_, _ = fmt.Fprintf(os.Stderr, "Internal error! Guess and solution have different lengths: %d vs %d", len(guess), len(solution))
+		return res
+	}
+
+	// checks for correct letters
+	for posInGuess, character := range guess {
+		if character == solution[posInGuess] {
+			res[posInGuess] = correctPosition
+			used[posInGuess] = true
+		}
+	}
+
+	// loooks for letters in the wrong position
+	for posInGuess, character := range guess {
+		if res[posInGuess] != absentCharacter {
+			// character has been already marked, ignore it
+			continue
+		}
+
+		for posInSolution, target := range solution {
+			if used[posInSolution] {
+				// letter of the soln. has already been assinged, skip to the next letter of the soln.
+				continue
+			}
+
+			if character == target {
+				res[posInGuess] = wrongPosition
+				used[posInSolution] = true
+
+				// skip to next letter of the guess
+				break
+			}
+		}
+	}
+
+	return res
+}
+
 func splitToUpperCase(input string) []rune {
 	return []rune(strings.ToUpper(input))
 }
@@ -45,6 +89,10 @@ func (g *Game) Play() {
 
 	for currentAttempt := 1; currentAttempt <= g.maxAttempts; currentAttempt++ {
 		guess := g.ask()
+
+		fb := computeFeedback(guess, g.solution)
+
+		fmt.Println(fb.String())
 
 		if slices.Equal(guess, g.solution) {
 			fmt.Printf("🔥 You won! You found it in %d guess(es)! The word was: %s.\n", currentAttempt, string(g.solution))
