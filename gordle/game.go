@@ -75,15 +75,20 @@ func splitToUpperCase(input string) []rune {
 	return []rune(strings.ToUpper(input))
 }
 
-func New(playerInput io.Reader, solution string, maxAttempts int) *Game {
+func New(reader io.Reader, corpus []string, maxAttempts int) (*Game, error) {
+	if len(corpus) == 0{
+		return nil, ErrCorpusIsEmpty
+	}
+	
 	g := &Game{
-		reader:      bufio.NewReader(playerInput),
-		solution:    splitToUpperCase(solution),
+		reader:      bufio.NewReader(reader),
+		solution:    []rune(strings.ToUpper(pickWords(corpus))),
 		maxAttempts: maxAttempts,
 	}
 
-	return g
+	return g, nil
 }
+
 func (g *Game) Play() {
 	fmt.Println("Welcome to gordle")
 
